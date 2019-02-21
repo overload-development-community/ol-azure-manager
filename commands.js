@@ -104,6 +104,8 @@ class Commands {
             throw new Warning("Server already started.");
         }
 
+        await Discord.queue("Please standby...", channel);
+
         try {
             await Azure.start(settings.servers[message]);
         } catch (err) {
