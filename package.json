@@ -1,0 +1,30 @@
+{
+    "name": "ol-azure-manager",
+    "version": "0.0.1",
+    "description": "A Discord bot to manage the startup and shutdown of Azure Overload servers.",
+    "homepage": "https://github.com/roncli/ol-azure-manager",
+    "bugs": {
+        "url": "https://github.com/roncli/ol-azure-manager/issues",
+        "email": "roncli@roncli.com"
+    },
+    "license": "None",
+    "author": {
+        "name": "Ronald M. Clifford",
+        "email": "roncli@roncli.com",
+        "url": "http://www.roncli.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/roncli/ol-azure-manager.git"
+    },
+    "dependencies": {
+        "azure-arm-compute": "9.1.0",
+        "discord.js": "11.4.2",
+        "ms-rest-azure": "2.6.0"
+    },
+    "devDependencies": {},
+    "engines": {
+        "node": ">=10.0.0"
+    },
+    "private": true
+}
