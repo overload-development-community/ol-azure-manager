@@ -1,4 +1,5 @@
-const Discord = require("./discord"),
+const browser = require("./browser"),
+    Discord = require("./discord"),
     Log = require("./log");
 
 //         #                 #
@@ -20,11 +21,15 @@ const Discord = require("./discord"),
         process.stdout.write("\x1b]2;Overload Azure Manager\x1b\x5c");
     }
 
+    setInterval(async () => {
+        await browser.check();
+    }, 60000);
+
     // Startup Discord.
     Discord.startup();
     Discord.connect();
 }());
 
-process.on("unhandledRejection", (reason) => {
+process.on("unhandledRejection", (/** @type {any} */reason) => {
     Log.exception("Unhandled promise rejection caught.", reason);
 });

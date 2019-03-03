@@ -22,7 +22,9 @@
         "discord.js": "11.4.2",
         "ms-rest-azure": "2.6.0"
     },
-    "devDependencies": {},
+    "devDependencies": {
+        "@types/node": "11.10.4"
+    },
     "engines": {
         "node": ">=10.0.0"
     },

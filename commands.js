@@ -4,6 +4,7 @@
  */
 
 const Azure = require("./azure"),
+    browser = require("./browser"),
     Exception = require("./exception"),
     settings = require("./settings"),
     Warning = require("./warning");
@@ -113,6 +114,23 @@ class Commands {
             throw new Exception("Error starting server.", err);
         }
 
+        browser.on(settings.servers[message].ipAddress, async (server) => {
+            clearTimeout(settings.servers[message].warningTimeout);
+            clearTimeout(settings.servers[message].timeout);
+            settings.servers[message].warningTimeout = setTimeout(async () => {
+                await Discord.queue(`The ${message} server will automatically shut down in 20 minutes.  Issue the \`!extend ${message}\` command to reset the shutdown timer to an hour.`, channel);
+            }, 2400000);
+            settings.servers[message].timeout = setTimeout(async () => {
+                Azure.stop(settings.servers[message]);
+                settings.servers[message].started = false;
+                await Discord.queue(`The ${message} server is being shutdown.  Thanks for playing!`, channel);
+
+                browser.removeAllListeners(settings.servers[message].ipAddress);
+            }, 3600000);
+
+            await Discord.queue(`${message} lobby status: ${server.map} ${server.mode}, ${server.numPlayers}/${server.maxNumPlayers} players`, channel);
+        });
+
         settings.servers[message].started = true;
         settings.servers[message].warningTimeout = setTimeout(async () => {
             await Discord.queue(`The ${message} server will automatically shut down in 20 minutes.  Issue the \`!extend ${message}\` command to reset the shutdown timer to an hour.`, channel);
@@ -121,6 +139,8 @@ class Commands {
             Azure.stop(settings.servers[message]);
             settings.servers[message].started = false;
             await Discord.queue(`The ${message} server is being shutdown.  Thanks for playing!`, channel);
+
+            browser.removeAllListeners(settings.servers[message].ipAddress);
         }, 3600000);
 
         await Discord.queue(`${user}, the ${message} server has been started at **${settings.servers[message].ipAddress}** and should be available in a couple of minutes.  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
@@ -167,6 +187,8 @@ class Commands {
             Azure.stop(settings.servers[message]);
             settings.servers[message].started = false;
             await Discord.queue(`The ${message} server is being shutdown.  Thanks for playing!`, channel);
+
+            browser.removeAllListeners(settings.servers[message].ipAddress);
         }, 3600000);
 
         await Discord.queue(`${user}, the ${message} server has been extended.  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
