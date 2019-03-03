@@ -21,7 +21,7 @@ const browser = require("./browser"),
         process.stdout.write("\x1b]2;Overload Azure Manager\x1b\x5c");
     }
 
-    setInterval(async () => {
+    setInterval(() => {
         browser.check();
     }, 60000);
 
