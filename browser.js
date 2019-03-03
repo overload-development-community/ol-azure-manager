@@ -2,8 +2,6 @@ const events = require("events"),
     http = require("http"),
     util = require("util"),
 
-    promisify = util.promisify,
-
     servers = {};
 
 //  ####
@@ -26,13 +24,12 @@ class Browser {
     //  ##   #  #   ##    ##   #  #
     /**
      * Checks the API for servers.
-     * @returns {Promise} A promise that resolves when the API check is complete.
+     * @returns {void}
      */
-    async check() {
+    check() {
         const browser = this;
 
-        try {
-            const res = await promisify(http.get)("http://olproxy.otl.gg/api", void 0, void 0);
+        const req = http.get("http://olproxy.otl.gg/api", (res) => {
             let body = "";
 
             res.on("data", (chunk) => {
@@ -54,8 +51,10 @@ class Browser {
                         });
                     } catch (err) {}
                 }
+
+                req.end();
             });
-        } catch (err) {}
+        });
     }
 }
 

@@ -22,7 +22,7 @@ const browser = require("./browser"),
     }
 
     setInterval(async () => {
-        await browser.check();
+        browser.check();
     }, 60000);
 
     // Startup Discord.
