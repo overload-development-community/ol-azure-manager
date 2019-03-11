@@ -1,6 +1,6 @@
 {
     "name": "ol-azure-manager",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A Discord bot to manage the startup and shutdown of Azure Overload servers.",
     "homepage": "https://github.com/roncli/ol-azure-manager",
     "bugs": {
