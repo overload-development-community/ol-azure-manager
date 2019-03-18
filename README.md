@@ -1,6 +1,6 @@
 # ol-azure-manager
 
-This repository starts and shuts down Azure servers as needed through a Discord chat interface.  Use `!servers` to start wherever the Discorde bot "The Fourth Sovereign" is located.
+This repository starts and shuts down Azure servers as needed through a Discord chat interface.  Use `!servers` to start wherever the Discord bot "The Fourth Sovereign" is located.
 
 ## Version History
 
