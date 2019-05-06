@@ -29,7 +29,7 @@ class Browser {
     check() {
         const browser = this;
 
-        const req = http.get("http://olproxy.otl.gg/api", (res) => {
+        const req = http.get("https://olproxy.otl.gg/api", (res) => {
             let body = "";
 
             res.on("data", (chunk) => {
