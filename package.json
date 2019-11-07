@@ -20,7 +20,8 @@
     "dependencies": {
         "azure-arm-compute": "9.1.0",
         "discord.js": "11.4.2",
-        "ms-rest-azure": "2.6.0"
+        "ms-rest-azure": "2.6.0",
+        "ws": "7.2.0"
     },
     "devDependencies": {
         "@types/node": "11.10.4"

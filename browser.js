@@ -1,6 +1,9 @@
 const events = require("events"),
     https = require("https"),
     util = require("util"),
+    Ws = require("ws"),
+
+    settings = require("./settings").browser,
 
     servers = {};
 
@@ -16,6 +19,31 @@ const events = require("events"),
  * @extends {events.EventEmitter}
  */
 class Browser {
+    //         #                 #
+    //         #                 #
+    //  ###   ###    ###  ###   ###
+    // ##      #    #  #  #  #   #
+    //   ##    #    # ##  #      #
+    // ###      ##   # #  #       ##
+    /**
+     * Starts up the websocket client
+     */
+    async start() {
+        const browser = this;
+        this.ws = new Ws(settings.trackerBaseUrl.replace(/^http(s:)/, 'ws$1'));
+
+        this.ws.on("close", function() { browser.ws = null; });
+        this.ws.on("error", function() { browser.ws = null; });
+
+        this.ws.on("message", (str) => {
+            let {ip, data} = JSON.parse(str);
+            if (!ip || !data || data.name != "Stats")
+                return;
+            if (data.type == "StartGame" || data.type == "LobbyStatus" || data.type == "LobbyExit")
+                this.updateServer(ip, data);
+        });
+    }
+
     //       #                 #
     //       #                 #
     //  ##   ###    ##    ##   # #
@@ -23,38 +51,31 @@ class Browser {
     // #     #  #  ##    #     # #
     //  ##   #  #   ##    ##   #  #
     /**
-     * Checks the API for servers.
+     * Check if the websocket client is still running
      * @returns {void}
      */
     check() {
-        const browser = this;
+         if (this.ws)
+             return;
+         this.start();
+    }
 
-        const req = https.get("https://olproxy.otl.gg/api", (res) => {
-            let body = "";
-
-            res.on("data", (chunk) => {
-                body += chunk;
-            });
-
-            res.on("end", () => {
-                if (res.statusCode === 200) {
-                    try {
-                        const data = JSON.parse(body);
-
-                        Object.keys(data).forEach((ip) => {
-                            if (!servers[ip]) {
-                                browser.emit(ip, data[ip]);
-                            } else if (servers[ip].numPlayers !== data[ip].numPlayers || servers[ip].maxNumPlayers !== data[ip].maxNumPlayers || servers[ip].map !== data[ip].map || servers[ip].mode !== data[ip].mode) {
-                                browser.emit(ip, data[ip]);
-                            }
-                            servers[ip] = data[ip];
-                        });
-                    } catch (err) {}
-                }
-
-                req.end();
-            });
-        });
+    updateServer(ip, settings) {
+        settings = settings || {};
+        var info = {numPlayers:(settings.players || []).length,
+            maxNumPlayers:settings.maxPlayers,
+            map:settings.level, mode:settings.matchMode,
+            jip:settings.joinInProgress};
+        if (!servers[ip]) {
+            this.emit(ip, info);
+        } else if (servers[ip].numPlayers !== info.numPlayers ||
+            servers[ip].maxNumPlayers !== info.maxNumPlayers ||
+            servers[ip].map !== info.map ||
+            servers[ip].mode !== info.mode ||
+            servers[ip].jip !== info.jip) {
+            this.emit(ip, info);
+        }
+        servers[ip] = info;
     }
 }
 
