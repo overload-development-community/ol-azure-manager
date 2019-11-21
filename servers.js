@@ -69,6 +69,9 @@ class Servers {
                 browser.removeAllListeners(server.ipAddress);
             }, 3600000);
 
+            if (!data.maxNumPlayers || data.numPlayers === void 0 || data.map === void 0 || data.mode === void 0) {
+                return;
+            }
             await Discord.queue(`${region} lobby status: ${data.map} ${data.mode}, ${data.numPlayers}/${data.maxNumPlayers} players\nJoin at **${server.ipAddress}**`, channel);
         });
     }
