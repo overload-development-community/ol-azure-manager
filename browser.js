@@ -1,5 +1,5 @@
 const events = require("events"),
-    http = require("http"),
+    https = require("https"),
     util = require("util"),
 
     servers = {};
@@ -29,7 +29,7 @@ class Browser {
     check() {
         const browser = this;
 
-        const req = http.get("https://olproxy.otl.gg/api", (res) => {
+        const req = https.get("https://olproxy.otl.gg/api", (res) => {
             let body = "";
 
             res.on("data", (chunk) => {
