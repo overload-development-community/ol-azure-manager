@@ -1,11 +1,7 @@
-const azure = require("ms-rest-azure"),
-    Compute = require("azure-arm-compute").ComputeManagementClient,
+const azure = require("@azure/identity"),
+    ComputeManagementClient = require("@azure/arm-compute").ComputeManagementClient,
 
     settings = require("./settings").azure;
-
-/**
- * @typedef {import("ms-rest-azure").ApplicationTokenCredentials} ApplicationTokenCredentials
- */
 
 //    #
 //   # #
@@ -30,10 +26,10 @@ class Azure {
      * @returns {Promise} A promise that resolves when the server has been started.
      */
     static async start(server) {
-        const credentials = await azure.loginWithServicePrincipalSecret(settings.clientId, settings.secret, settings.domain),
-            client = new Compute(credentials, settings.subscriptionId);
+        const credential = new azure.ClientSecretCredential(settings.tenantId, settings.clientId, settings.secret),
+            client = new ComputeManagementClient(credential, settings.subscriptionId);
 
-        return client.virtualMachines.start(server.resourceGroupName, server.vmName);
+        return client.virtualMachines.beginStart(server.resourceGroupName, server.vmName);
     }
 
     //         #
@@ -49,10 +45,10 @@ class Azure {
      * @returns {Promise} A promise that resolves when the server has been stopped.
      */
     static async stop(server) {
-        const credentials = await azure.loginWithServicePrincipalSecret(settings.clientId, settings.secret, settings.domain),
-            client = new Compute(credentials, settings.subscriptionId);
+        const credential = new azure.ClientSecretCredential(settings.tenantId, settings.clientId, settings.secret),
+            client = new ComputeManagementClient(credential, settings.subscriptionId);
 
-        return client.virtualMachines.deallocate(server.resourceGroupName, server.vmName);
+        return client.virtualMachines.beginDeallocate(server.resourceGroupName, server.vmName);
     }
 }
 

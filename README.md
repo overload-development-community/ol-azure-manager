@@ -4,6 +4,10 @@ This repository starts and shuts down Azure servers as needed through a Discord 
 
 ## Version History
 
+### 1.0.3 - 7/26/2022
+
+* Modernization of libraries.
+
 ### 1.0.2 - 3/17/2019
 
 * Include the IP address when giving a lobby status update.

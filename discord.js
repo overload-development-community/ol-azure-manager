@@ -7,7 +7,18 @@ const DiscordJs = require("discord.js"),
     Warning = require("./warning"),
 
     commands = new Commands(),
-    discord = new DiscordJs.Client(/** @type {DiscordJs.ClientOptions} */ (settings.discord.options)), // eslint-disable-line no-extra-parens
+    discord = new DiscordJs.Client({
+        intents: [
+            DiscordJs.IntentsBitField.Flags.DirectMessages,
+            DiscordJs.IntentsBitField.Flags.Guilds,
+            DiscordJs.IntentsBitField.Flags.GuildMembers,
+            DiscordJs.IntentsBitField.Flags.GuildMessages,
+            DiscordJs.IntentsBitField.Flags.GuildPresences,
+            DiscordJs.IntentsBitField.Flags.MessageContent
+        ],
+        partials: [DiscordJs.Partials.Channel],
+        rest: {retries: 999999}
+    }), // eslint-disable-line no-extra-parens
     messageParse = /^!([^ ]+)(?: +(.*[^ ]))? *$/;
 
 /**
@@ -52,8 +63,8 @@ class Discord {
      * @returns {string} The URL of the icon.
      */
     static get icon() {
-        if (discord && discord.status === 0) {
-            return discord.user.avatarURL;
+        if (discord && discord.ws && discord.ws.status === 0) {
+            return discord.user.avatarURL();
         }
 
         return void 0;
@@ -74,14 +85,14 @@ class Discord {
         discord.on("ready", () => {
             Log.log("Connected to Discord.");
 
-            guild = discord.guilds.find((g) => g.name === settings.guild);
+            guild = discord.guilds.cache.find((g) => g.name === settings.guild);
         });
 
         discord.on("disconnect", (ev) => {
             Log.exception("Disconnected from Discord.", ev);
         });
 
-        discord.on("message", (message) => {
+        discord.on("messageCreate", (message) => {
             Discord.message(message.author, message.content, message.channel);
         });
     }
@@ -121,7 +132,7 @@ class Discord {
      * @returns {boolean} Whether the bot is connected to Discord.
      */
     static isConnected() {
-        return discord && discord.ws && discord.ws.connection ? discord.status === 0 : false;
+        return discord && discord.ws && guild ? discord.ws.status === 0 : false;
     }
 
     // # #    ##    ###    ###    ###   ###   ##
@@ -133,7 +144,7 @@ class Discord {
      * Parses a message.
      * @param {DiscordJs.User} user The user who sent the message.
      * @param {string} message The text of the message.
-     * @param {DiscordJs.TextChannel|DiscordJs.DMChannel|DiscordJs.GroupDMChannel} channel The channel the message was sent on.
+     * @param {DiscordJs.TextBasedChannel} channel The channel the message was sent on.
      * @returns {Promise} A promise that resolves when the message is parsed.
      */
     static async message(user, message, channel) {
@@ -176,7 +187,7 @@ class Discord {
     /**
      * Queues a message to be sent.
      * @param {string} message The message to be sent.
-     * @param {DiscordJs.TextChannel|DiscordJs.DMChannel|DiscordJs.GroupDMChannel|DiscordJs.GuildMember} channel The channel to send the message to.
+     * @param {DiscordJs.TextBasedChannel} channel The channel to send the message to.
      * @returns {Promise<DiscordJs.Message>} A promise that resolves with the sent message.
      */
     static async queue(message, channel) {
@@ -186,24 +197,24 @@ class Discord {
 
         let msg;
         try {
-            msg = await Discord.richQueue(new DiscordJs.RichEmbed({description: message}), channel);
+            msg = await Discord.richQueue(new DiscordJs.EmbedBuilder({description: message}), channel);
         } catch {}
         return msg;
     }
 
-    //        #          #     ####        #              #
-    //                   #     #           #              #
-    // ###   ##     ##   ###   ###   # #   ###    ##    ###
-    // #  #   #    #     #  #  #     ####  #  #  # ##  #  #
-    // #      #    #     #  #  #     #  #  #  #  ##    #  #
-    // #     ###    ##   #  #  ####  #  #  ###    ##    ###
+    //             #              #  ###          #    ##       #
+    //             #              #  #  #               #       #
+    //  ##   # #   ###    ##    ###  ###   #  #  ##     #     ###   ##   ###
+    // # ##  ####  #  #  # ##  #  #  #  #  #  #   #     #    #  #  # ##  #  #
+    // ##    #  #  #  #  ##    #  #  #  #  #  #   #     #    #  #  ##    #
+    //  ##   #  #  ###    ##    ###  ###    ###  ###   ###    ###   ##   #
     /**
-     * Gets a new DiscordJs RichEmbed object.
-     * @param {DiscordJs.RichEmbedOptions} [options] The options to pass.
-     * @returns {DiscordJs.RichEmbed} The RichEmbed object.
+     * Gets a new DiscordJs EmbedBuilder object.
+     * @param {DiscordJs.EmbedData} [options] The options to pass.
+     * @returns {DiscordJs.EmbedBuilder} The EmbedBuilder object.
      */
-    static richEmbed(options) {
-        return new DiscordJs.RichEmbed(options);
+    static embedBuilder(options) {
+        return new DiscordJs.EmbedBuilder(options);
     }
 
     //        #          #      ##
@@ -215,8 +226,8 @@ class Discord {
     //                            #
     /**
      * Queues a rich embed message to be sent.
-     * @param {DiscordJs.RichEmbed} embed The message to be sent.
-     * @param {DiscordJs.TextChannel|DiscordJs.DMChannel|DiscordJs.GroupDMChannel|DiscordJs.GuildMember} channel The channel to send the message to.
+     * @param {DiscordJs.EmbedBuilder} embed The message to be sent.
+     * @param {DiscordJs.TextBasedChannel} channel The channel to send the message to.
      * @returns {Promise<DiscordJs.Message>} A promise that resolves with the sent message.
      */
     static async richQueue(embed, channel) {
@@ -224,27 +235,27 @@ class Discord {
             return void 0;
         }
 
-        embed.setFooter(embed.footer ? embed.footer.text : "", Discord.icon);
+        embed.setFooter({text: embed.data && embed.data.footer ? embed.data.footer.text : "Overload Teams League", iconURL: Discord.icon});
 
-        if (embed && embed.fields) {
-            embed.fields.forEach((field) => {
+        if (embed && embed.data && embed.data.fields) {
+            embed.data.fields.forEach((field) => {
                 if (field.value && field.value.length > 1024) {
                     field.value = field.value.substring(0, 1024);
                 }
             });
         }
 
-        if (!embed.color) {
+        if (!embed.data || !embed.data.color) {
             embed.setColor(0xFF6600);
         }
 
-        if (!embed.timestamp) {
+        if (!embed.data || !embed.data.timestamp) {
             embed.setTimestamp(new Date());
         }
 
         let msg;
         try {
-            const msgSent = await channel.send("", embed);
+            const msgSent = await channel.send({embeds: [embed]});
 
             if (msgSent instanceof Array) {
                 msg = msgSent[0];
@@ -265,10 +276,10 @@ class Discord {
     /**
      * Finds a Discord channel by its name.
      * @param {string} name The name of the channel.
-     * @returns {DiscordJs.GuildChannel} The Discord channel.
+     * @returns {DiscordJs.GuildBasedChannel} The Discord channel.
      */
     static findChannelByName(name) {
-        return guild.channels.find((c) => c.name === name);
+        return guild.channels.cache.find((c) => c.name === name);
     }
 
     //  #            ##

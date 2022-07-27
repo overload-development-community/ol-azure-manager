@@ -15,7 +15,7 @@ const events = require("events"),
  * A class that represents checking the Overload Game Browser.
  * @extends {events.EventEmitter}
  */
-class Browser {
+class Browser extends events.EventEmitter {
     //       #                 #
     //       #                 #
     //  ##   ###    ##    ##   # #
@@ -57,8 +57,6 @@ class Browser {
         });
     }
 }
-
-util.inherits(Browser, events.EventEmitter);
 
 const browser = new Browser();
 

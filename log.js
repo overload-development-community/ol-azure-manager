@@ -101,34 +101,46 @@ class Log {
     //                   #
     /**
      * Outputs the log queue.
-     * @returns {void}
+     * @returns {Promise} A promise that resolves when the log queue is output.
      */
-    static output() {
+    static async output() {
         if (!Discord) {
             Discord = require("./discord");
         }
 
         if (Discord.guild && Discord.isConnected()) {
-            queue.forEach((log) => {
-                const message = Discord.richEmbed({
-                    color: log.type === "log" ? 0x80FF80 : log.type === "warning" ? 0xFFFF00 : 0xFF0000,
-                    fields: [],
-                    timestamp: log.date
-                });
+            for (const log of queue) {
+                let value = util.inspect(log.obj),
+                    continued = false;
 
-                if (log.message) {
-                    message.setDescription(log.message);
+                while (value.length > 0) {
+                    if (continued) {
+                        await Discord.queue(value.substring(0, 1024), /** @type {DiscordJs.TextChannel} */ (Discord.findChannelByName(log.type === "exception" ? "otlbot-errors" : "otlbot-log"))); // eslint-disable-line no-extra-parens
+                    } else if (log.message) {
+                        const message = Discord.embedBuilder({
+                            color: log.type === "log" ? 0x80FF80 : log.type === "warning" ? 0xFFFF00 : 0xFF0000,
+                            fields: [],
+                            timestamp: log.date.getTime() // TODO: Remove .getTime() once this is fixed: https://github.com/discordjs/discord.js/issues/8323
+                        });
+
+                        message.setDescription(log.message);
+
+                        if (value) {
+                            message.addFields({
+                                name: "Message",
+                                value: value.substring(0, 1024),
+                                inline: false
+                            });
+                        }
+
+                        continued = true;
+
+                        await Discord.richQueue(message, /** @type {DiscordJs.TextChannel} */ (Discord.findChannelByName(log.type === "exception" ? "otlbot-errors" : "otlbot-log"))); // eslint-disable-line no-extra-parens
+                    }
+
+                    value = value.substring(1024);
                 }
-
-                if (log.obj) {
-                    message.fields.push({
-                        name: "Message",
-                        value: util.inspect(log.obj)
-                    });
-                }
-
-                Discord.richQueue(message, /** @type {DiscordJs.TextChannel} */ (Discord.findChannelByName(log.type === "exception" ? "otlbot-errors" : "otlbot-log"))); // eslint-disable-line no-extra-parens
-            });
+            }
 
             queue.splice(0, queue.length);
         } else {

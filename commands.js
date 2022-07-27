@@ -45,7 +45,7 @@ class Commands {
             return false;
         }
 
-        const msg = Discord.richEmbed({
+        const msg = Discord.embedBuilder({
             title: "Overload Azure Server Status",
             fields: []
         });
@@ -64,11 +64,17 @@ class Commands {
         });
 
         if (offline.length > 0) {
-            msg.addField("Offline Servers - Use `!start <region>` to start a server.", offline.join("\n"));
+            msg.addFields({
+                name: "Offline Servers - Use `!start <region>` to start a server.",
+                value: offline.join("\n")
+            });
         }
 
         if (online.length > 0) {
-            msg.addField("Online Servers - Use `!extend <region>` to extend the server's shutdown time.", online.map((r) => `${r} - ${settings.servers[r].ipAddress}`).join("\n"));
+            msg.addFields({
+                name: "Online Servers - Use `!extend <region>` to extend the server's shutdown time.",
+                value: online.map((r) => `${r} - ${settings.servers[r].ipAddress}`).join("\n")
+            });
         }
 
         await Discord.richQueue(msg, channel);
