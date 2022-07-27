@@ -18,7 +18,7 @@
         "url": "https://github.com/roncli/ol-azure-manager.git"
     },
     "dependencies": {
-        "azure-arm-compute": "9.1.0",
+        "@azure/arm-compute": "19.1.0",
         "discord.js": "11.4.2",
         "ms-rest-azure": "2.6.0"
     },
