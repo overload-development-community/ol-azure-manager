@@ -23,7 +23,7 @@
         "discord.js": "14.1.2"
     },
     "devDependencies": {
-        "@types/node": "18.6.4"
+        "@types/node": "18.6.5"
     },
     "engines": {
         "node": ">=16.0.0"
