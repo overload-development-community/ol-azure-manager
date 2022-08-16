@@ -158,7 +158,7 @@ class Commands {
 
         Servers.setup(settings.servers[message], message, channel);
 
-        await Discord.queue(`${user}, the ${message} server has been extended.  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
+        await Discord.queue(`${user}, the ${message} server has been extended at **${settings.servers[message].ipAddress}**.  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
         return true;
     }
 }
