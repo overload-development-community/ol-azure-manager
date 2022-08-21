@@ -66,7 +66,7 @@ class Commands {
         if (offline.length > 0) {
             msg.addFields({
                 name: "Offline Servers - Use `!start <region>` to start a server.",
-                value: online.map((r) => `${r} - ${settings.servers[r].location}`).join("\n")
+                value: offline.map((r) => `${r} - ${settings.servers[r].location}`).join("\n")
             });
         }
 
