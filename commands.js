@@ -52,7 +52,7 @@ class Commands {
 
         const offline = [],
             online = [];
-
+ 
         Object.keys(settings.servers).sort().forEach((region) => {
             const server = settings.servers[region];
 
@@ -66,14 +66,14 @@ class Commands {
         if (offline.length > 0) {
             msg.addFields({
                 name: "Offline Servers - Use `!start <region>` to start a server.",
-                value: offline.join("\n")
+                value: online.map((r) => `${r} - ${settings.servers[r].location}`).join("\n")
             });
         }
 
         if (online.length > 0) {
             msg.addFields({
                 name: "Online Servers - Use `!extend <region>` to extend the server's shutdown time.",
-                value: online.map((r) => `${r} - ${settings.servers[r].ipAddress} - ${settings.servers[r].location}`).join("\n")
+                value: online.map((r) => `${r} - ${settings.servers[r].ipAddress} - ${settings.servers[r].host} - ${settings.servers[r].location}`).join("\n")
             });
         }
 
@@ -122,7 +122,7 @@ class Commands {
 
         Servers.setup(settings.servers[message], message, channel);
 
-        await Discord.queue(`${user}, the ${message} server has been started at **${settings.servers[message].ipAddress}** and should be available in a couple of minutes.  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
+        await Discord.queue(`${user}, the ${message} server has been started at **${settings.servers[message].ipAddress}** (${settings.servers[message].host}) and should be available in a couple of minutes.  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
         return true;
     }
 
@@ -158,7 +158,7 @@ class Commands {
 
         Servers.setup(settings.servers[message], message, channel);
 
-        await Discord.queue(`${user}, the ${message} server has been extended at **${settings.servers[message].ipAddress}**.  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
+        await Discord.queue(`${user}, the ${message} server has been extended at **${settings.servers[message].ipAddress}** (${settings.servers[message].host}).  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
         return true;
     }
 }
