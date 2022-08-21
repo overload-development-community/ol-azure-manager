@@ -73,7 +73,7 @@ class Commands {
         if (online.length > 0) {
             msg.addFields({
                 name: "Online Servers - Use `!extend <region>` to extend the server's shutdown time.",
-                value: online.map((r) => `${r} - ${settings.servers[r].ipAddress}`).join("\n")
+                value: online.map((r) => `${r} - ${settings.servers[r].ipAddress} - ${settings.servers[r].location}`).join("\n")
             });
         }
 
