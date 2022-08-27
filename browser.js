@@ -44,13 +44,14 @@ class Browser extends events.EventEmitter {
                         for (const server of data) {
                             if (server.game) {
                                 if (!servers[server.server.ip]) {
-                                    browser.emit(server.server.ip, {game: server.game, inLobby: servers[server.server.ip].game.inLobby})
+                                    browser.emit(server.server.ip, {game: server.game, inLobby: false})
                                 } else if (server.game.currentPlayers !== servers[server.server.ip].currentPlayers || server.game.maxPlayers !== servers[server.server.ip].maxPlayers || server.game.mapName !== servers[server.server.ip].mapName || server.game.mode !== servers[server.server.ip].mode || server.game.inLobby !== servers[server.server.ip].inLobby) {
-                                    browser.emit(server.server.ip, {game: server.game, inLobby: servers[server.server.ip].game.inLobby});
+                                    browser.emit(server.server.ip, {game: server.game, inLobby: servers[server.server.ip].inLobby});
                                 }
                             } else {
                                 if (servers[server.server.ip]) {
-                                    browser.emit(server.server.ip, {game: null, inLobby: servers[server.server.ip].game.inLobby});
+                                    console.log("Ending");
+                                    browser.emit(server.server.ip, {game: null, inLobby: servers[server.server.ip].inLobby});
                                 }
                             }
 
