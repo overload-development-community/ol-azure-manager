@@ -22,8 +22,8 @@ const browser = require("./browser"),
     }
 
     setInterval(() => {
-        browser.check();
-    }, 60000);
+        browser.checkBrowser();
+    }, 5000);
 
     // Startup Discord.
     Discord.startup();

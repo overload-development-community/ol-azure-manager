@@ -16,20 +16,20 @@ const events = require("events"),
  * @extends {events.EventEmitter}
  */
 class Browser extends events.EventEmitter {
-    //       #                 #
-    //       #                 #
-    //  ##   ###    ##    ##   # #
-    // #     #  #  # ##  #     ##
-    // #     #  #  ##    #     # #
-    //  ##   #  #   ##    ##   #  #
+    //       #                 #     ###
+    //       #                 #     #  #
+    //  ##   ###    ##    ##   # #   ###   ###    ##   #  #   ###    ##   ###
+    // #     #  #  # ##  #     ##    #  #  #  #  #  #  #  #  ##     # ##  #  #
+    // #     #  #  ##    #     # #   #  #  #     #  #  ####    ##   ##    #
+    //  ##   #  #   ##    ##   #  #  ###   #      ##   ####  ###     ##   #
     /**
-     * Checks the API for servers.
+     * Checks the browser API for servers.
      * @returns {void}
      */
-    check() {
+    checkBrowser() {
         const browser = this;
 
-        const req = https.get("https://olproxy.otl.gg/api", (res) => {
+        const req = https.get("https://tracker.otl.gg/api/browser", (res) => {
             let body = "";
 
             res.on("data", (chunk) => {
@@ -41,14 +41,61 @@ class Browser extends events.EventEmitter {
                     try {
                         const data = JSON.parse(body);
 
-                        Object.keys(data).forEach((ip) => {
-                            if (!servers[ip]) {
-                                browser.emit(ip, data[ip]);
-                            } else if (servers[ip].numPlayers !== data[ip].numPlayers || servers[ip].maxNumPlayers !== data[ip].maxNumPlayers || servers[ip].map !== data[ip].map || servers[ip].mode !== data[ip].mode) {
-                                browser.emit(ip, data[ip]);
+                        for (const server of data) {
+                            if (server.game) {
+                                if (!servers[server.server.ip]) {
+                                    browser.emit(server.server.ip, {game: server.game, inLobby: servers[server.server.ip].game.inLobby})
+                                } else if (server.game.currentPlayers !== servers[server.server.ip].currentPlayers || server.game.maxPlayers !== servers[server.server.ip].maxPlayers || server.game.mapName !== servers[server.server.ip].mapName || server.game.mode !== servers[server.server.ip].mode || server.game.inLobby !== servers[server.server.ip].inLobby) {
+                                    browser.emit(server.server.ip, {game: server.game, inLobby: servers[server.server.ip].game.inLobby});
+                                }
+                            } else {
+                                if (servers[server.server.ip]) {
+                                    browser.emit(server.server.ip, {game: null, inLobby: servers[server.server.ip].game.inLobby});
+                                }
                             }
-                            servers[ip] = data[ip];
-                        });
+
+                            servers[server.server.ip] = server.game;
+                        }
+                    } catch (err) {}
+                }
+
+                req.end();
+            });
+        });
+    }
+
+    //       #                 #      ##                     #      #            #
+    //       #                 #     #  #                    #                   #
+    //  ##   ###    ##    ##   # #   #      ###  # #    ##   #     ##     ###   ###
+    // #     #  #  # ##  #     ##    # ##  #  #  ####  # ##  #      #    ##      #
+    // #     #  #  ##    #     # #   #  #  # ##  #  #  ##    #      #      ##    #
+    //  ##   #  #   ##    ##   #  #   ###   # #  #  #   ##   ####  ###   ###      ##
+    /**
+     * Checks the game list API for a completed game.
+     * @param {string} ip The IP address of the game.
+     * @returns {void}
+     */
+    checkGameList(ip) {
+        const browser = this;
+
+        const req = https.get("https://tracker.otl.gg/api/gamelist?page=1", (res) => {
+            let body = "";
+
+            res.on("data", (chunk) => {
+                body += chunk;
+            });
+
+            res.on("end", () => {
+                if (res.statusCode === 200) {
+                    try {
+                        const data = JSON.parse(body);
+
+                        for (const game of data.games) {
+                            if (game.ip === ip) {
+                                browser.emit(ip, {complete: game})
+                            }
+                            break;
+                        }
                     } catch (err) {}
                 }
 
