@@ -27,7 +27,7 @@ setTimeout(() => {
 class Servers {
     static setTimeouts(server, region, channel) {
         server.warningTimeout = setTimeout(async () => {
-            await Discord.queue(`The ${region} server will automatically shut down in 5 minutes.  Start a new game to reset the shutdown timer to 15 minutes after the completion of that game.`, channel);
+            await Discord.queue(`The ${region} server will automatically shut down in 5 minutes.  Use the \`!extend ${region}\` command to reset the shutdown timer to 15 minutes.`, channel);
         }, 600000);
         server.timeout = setTimeout(async () => {
             Azure.stop(server);

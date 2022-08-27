@@ -107,7 +107,7 @@ class Commands {
         }
 
         if (settings.servers[message].started) {
-            await Discord.queue(`Sorry, ${user}, but this server is already running.`, channel);
+            await Discord.queue(`Sorry, ${user}, but this server is already running.  Did you mean to \`!extend ${message}\` instead?`, channel);
             throw new Warning("Server already started.");
         }
 
@@ -122,7 +122,43 @@ class Commands {
 
         Servers.setup(settings.servers[message], message, channel);
 
-        await Discord.queue(`${user}, the ${message} server has been started at **${settings.servers[message].ipAddress}** (${settings.servers[message].host}) and should be available in a couple of minutes.  The server will automatically shut down when idle for 15 minutes.`, channel);
+        await Discord.queue(`${user}, the ${message} server has been started at **${settings.servers[message].ipAddress}** (${settings.servers[message].host}) and should be available in a couple of minutes.  The server will automatically shut down when idle for 15 minutes.  Use the \`!extend ${message}\` command to reset the idle shutdown timer and move notifications about this server to a new channel.`, channel);
+        return true;
+    }
+
+    //              #                   #
+    //              #                   #
+    //  ##   #  #  ###    ##   ###    ###
+    // # ##   ##    #    # ##  #  #  #  #
+    // ##     ##    #    ##    #  #  #  #
+    //  ##   #  #    ##   ##   #  #   ###
+    /**
+     * Extends a server in the requested region.
+     * @param {DiscordJs.User} user The user initiating the command.
+     * @param {DiscordJs.TextChannel} channel The channel the message was sent over.
+     * @param {string} message The text of the command.
+     * @returns {Promise<boolean>} A promise that resolves with whether the command completed successfully.
+     */
+    async extend(user, channel, message) {
+        if (!message) {
+            return false;
+        }
+
+        message = message.toLowerCase();
+
+        if (!settings.servers[message]) {
+            await Discord.queue(`Sorry, ${user}, but this is not a valid server.  Use the \`!servers\` command to see the list of servers.`, channel);
+            throw new Warning("Server does not exist.");
+        }
+
+        if (!settings.servers[message].started) {
+            await Discord.queue(`Sorry, ${user}, but this server is not running.  Did you mean to \`!start ${message}\` instead?`, channel);
+            throw new Warning("Server not started.");
+        }
+
+        Servers.setup(settings.servers[message], message, channel);
+
+        await Discord.queue(`${user}, the ${message} server has been extended at **${settings.servers[message].ipAddress}** (${settings.servers[message].host}).  The server will automatically shut down in one hour unless you issue the \`!extend ${message}\` command.`, channel);
         return true;
     }
 }
