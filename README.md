@@ -7,7 +7,6 @@ This repository starts and shuts down Azure servers as needed through a Discord 
 ### v1.0.5 - 8/27/2022
 
 * Servers now shut down after being idle for 15 minutes, rather than 60 minutes after startup or the start of the most recent game.
-* `!extend` command removed.
 * Player updates are now reported continuously throughout the game.
 * Player updates are now reported every 5 seconds instead of every 60 seconds.
 * Games are now reported upon completion.
