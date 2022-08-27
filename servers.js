@@ -71,12 +71,12 @@ class Servers {
                     if (data.complete.data.teamScore && Object.keys(data.complete.data.teamScore).length > 0) {
                         embed.addFields(Object.keys(data.complete.data.teamScore).sort((a, b) => data.complete.data.teamScore[b] - data.complete.data.teamScore[a]).map((team) => ({
                             name: team,
-                            value: data.complete.data.teamScore[team]
+                            value: data.complete.data.teamScore[team].toLocaleString("en-us")
                         })));
                     } else {
                         embed.addFields(data.complete.data.players.sort((a, b) => (b.kills * 3 + b.assists) - (a.kills * 3 + a.assists)).map((player) => ({
                             name: player.name,
-                            value: data.complete.data.players.length === 2 ? player.kills : player.kills * 3 + player.assists
+                            value: (data.complete.data.players.length === 2 ? player.kills : player.kills * 3 + player.assists).toLocaleString("en-us")
                         })))
                     }
 
@@ -103,6 +103,12 @@ class Servers {
                 if (!data.inLobby) {
                     browser.checkGameList(server.ipAddress);
                 }
+                return;
+            }
+
+            // Check if we're just starting a game.
+            if (data.inLobby && !data.game.inLobby) {
+                await Discord.queue(`${region} game has started!`, channel);
                 return;
             }
 
