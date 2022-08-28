@@ -4,6 +4,7 @@
 
 const Azure = require("./azure"),
     browser = require("./browser");
+const Log = require("./log");
 
 /**
  * @type {typeof import("./discord")}
@@ -62,25 +63,29 @@ class Servers {
         browser.on(server.ipAddress, async (data) => {
             // We're receiving data about a completed game, display the summary.
             if (data.complete) {
-                if (data.complete.data) {
-                    const embed = Discord.embedBuilder({
-                        title: `${region} Game Completed`,
-                        description: `Tracker URL: https://tracker.otl.gg/archive/${data.complete.id}`
-                    })
+                try {
+                    if (data.complete.data) {
+                        const embed = Discord.embedBuilder({
+                            title: `${region} Game Completed`,
+                            description: `Tracker URL: https://tracker.otl.gg/archive/${data.complete.id}`
+                        })
 
-                    if (data.complete.data.teamScore && Object.keys(data.complete.data.teamScore).length > 0) {
-                        embed.addFields(Object.keys(data.complete.data.teamScore).sort((a, b) => data.complete.data.teamScore[b] - data.complete.data.teamScore[a]).map((team) => ({
-                            name: team,
-                            value: data.complete.data.teamScore[team].toLocaleString("en-us")
-                        })));
-                    } else {
-                        embed.addFields(data.complete.data.players.sort((a, b) => (b.kills * 3 + b.assists) - (a.kills * 3 + a.assists)).map((player) => ({
-                            name: player.name,
-                            value: (data.complete.data.players.length === 2 ? player.kills : player.kills * 3 + player.assists).toLocaleString("en-us")
-                        })))
+                        if (data.complete.data.teamScore && Object.keys(data.complete.data.teamScore).length > 0) {
+                            embed.addFields(Object.keys(data.complete.data.teamScore).sort((a, b) => data.complete.data.teamScore[b] - data.complete.data.teamScore[a]).map((team) => ({
+                                name: team,
+                                value: data.complete.data.teamScore[team].toLocaleString("en-us")
+                            })));
+                        } else {
+                            embed.addFields(data.complete.data.players.sort((a, b) => (b.kills * 3 + b.assists) - (a.kills * 3 + a.assists)).map((player) => ({
+                                name: player.name,
+                                value: (data.complete.data.players.length === 2 ? player.kills : player.kills * 3 + player.assists).toLocaleString("en-us")
+                            })))
+                        }
+
+                        Discord.richQueue(embed, channel);
                     }
-
-                    Discord.richQueue(embed, channel);
+                } catch (err) {
+                    Log.exception("There was an error while displaying completed game data.", err);
                 }
 
                 return;

@@ -1,3 +1,5 @@
+const Log = require("./log");
+
 const events = require("events"),
     https = require("https"),
     util = require("util"),
@@ -57,7 +59,9 @@ class Browser extends events.EventEmitter {
 
                             servers[server.server.ip] = server.game;
                         }
-                    } catch (err) {}
+                    } catch (err) {
+                        Log.exception("There was an exception while getting the browser API data.", err);
+                    }
                 }
 
                 req.end();
@@ -97,7 +101,9 @@ class Browser extends events.EventEmitter {
                             }
                             break;
                         }
-                    } catch (err) {}
+                    } catch (err) {
+                        Log.exception("There was an exception while getting the game list API data.", err);
+                    }
                 }
 
                 req.end();
