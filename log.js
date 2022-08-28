@@ -110,7 +110,7 @@ class Log {
 
         if (Discord.guild && Discord.isConnected()) {
             for (const log of queue) {
-                let value = util.inspect(log.obj),
+                let value = log.obj ? util.inspect(log.obj) : void 0,
                     continued = false;
 
                 while (value.length > 0) {
