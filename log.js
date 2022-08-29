@@ -139,7 +139,7 @@ class Log {
                     }
 
                     value = value.substring(1024);
-                } while (value.length > 0)
+                } while (value.length > 0);
             }
 
             queue.splice(0, queue.length);
