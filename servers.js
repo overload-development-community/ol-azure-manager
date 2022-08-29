@@ -26,12 +26,24 @@ setTimeout(() => {
  * A class that handles communications about the servers to Discord.
  */
 class Servers {
+    //               #    ###    #                             #
+    //               #     #                                   #
+    //  ###    ##   ###    #    ##    # #    ##    ##   #  #  ###    ###
+    // ##     # ##   #     #     #    ####  # ##  #  #  #  #   #    ##
+    //   ##   ##     #     #     #    #  #  ##    #  #  #  #   #      ##
+    // ###     ##     ##   #    ###   #  #   ##    ##    ###    ##  ###
+    /**
+     * Sets the timeouts.
+     * @param {object} server The server.
+     * @param {string} region The region.
+     * @param {DiscordJs.TextChannel} channel The channel.
+     */
     static setTimeouts(server, region, channel) {
         server.warningTimeout = setTimeout(async () => {
             await Discord.queue(`The ${region} server will automatically shut down in 5 minutes.  Use the \`!extend ${region}\` command to reset the shutdown timer to 15 minutes.`, channel);
         }, 600000);
         server.timeout = setTimeout(async () => {
-            Azure.stop(server);
+            await Azure.stop(server);
             server.started = false;
             await Discord.queue(`The ${region} server is being shutdown.  Thanks for playing!`, channel);
 
@@ -55,8 +67,14 @@ class Servers {
      */
     static setup(server, region, channel) {
         server.started = true;
-        clearTimeout(server.warningTimeout);
-        clearTimeout(server.timeout);
+        if (server.warningTimeout !== 0) {
+            clearTimeout(server.warningTimeout);
+        }
+        if (server.timeout !== 0) {
+            clearTimeout(server.timeout);
+        }
+        server.warningTimeout = 0;
+        server.timeout = 0;
         this.setTimeouts(server, region, channel);
 
         browser.removeAllListeners(server.ipAddress);

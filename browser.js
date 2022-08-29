@@ -52,7 +52,6 @@ class Browser extends events.EventEmitter {
                                 }
                             } else {
                                 if (servers[server.server.ip]) {
-                                    console.log("Ending");
                                     browser.emit(server.server.ip, {game: null, inLobby: servers[server.server.ip].inLobby});
                                 }
                             }

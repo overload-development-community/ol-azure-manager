@@ -110,10 +110,10 @@ class Log {
 
         if (Discord.guild && Discord.isConnected()) {
             for (const log of queue) {
-                let value = log.obj ? util.inspect(log.obj) : void 0,
+                let value = log.obj ? util.inspect(log.obj) : "",
                     continued = false;
 
-                while (value.length > 0) {
+                do {
                     if (continued) {
                         await Discord.queue(value.substring(0, 1024), /** @type {DiscordJs.TextChannel} */ (Discord.findChannelByName(log.type === "exception" ? "otlbot-errors" : "otlbot-log"))); // eslint-disable-line no-extra-parens
                     } else if (log.message) {
@@ -125,7 +125,7 @@ class Log {
 
                         message.setDescription(log.message);
 
-                        if (value) {
+                        if (value.length > 0) {
                             message.addFields({
                                 name: "Message",
                                 value: value.substring(0, 1024),
@@ -139,7 +139,7 @@ class Log {
                     }
 
                     value = value.substring(1024);
-                }
+                } while (value.length > 0)
             }
 
             queue.splice(0, queue.length);
