@@ -82,7 +82,7 @@ class Servers {
                             })))
                         }
 
-                        Discord.richQueue(embed, channel);
+                        await Discord.richQueue(embed, channel);
                     }
                 } catch (err) {
                     Log.exception("There was an error while displaying completed game data.", err);
