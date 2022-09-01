@@ -2,6 +2,10 @@
 
 This repository starts and shuts down Azure servers as needed through a Discord chat interface.  Use `!servers` to start wherever the Discord bot "The Fourth Sovereign" is located.
 
+## Deprecation Notice
+
+As of 8/31/2022, this application is no longer being developed here.  It has been merged with [otl.gg](https://github.com/overload-development-community/otl.gg).
+
 ## Version History
 
 ### v1.0.5 - 8/27/2022
